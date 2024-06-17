@@ -1,0 +1,6 @@
+discord.py
+yt-dlp
+ffmpeg
+asyncio
+PyNaCl
+youtube-search-python

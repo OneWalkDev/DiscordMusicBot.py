@@ -1,5 +1,6 @@
 INITIAL_EXTENSIONS = [
     'command.joinCommand',
+    'command.playCommand'
 ]
 
 async def load_extension(bot):
