@@ -4,7 +4,7 @@ from config.Config import DISCORD_TOKEN, LOG
 from command.Command import load_extension
 from discord.ext import commands
 from logger.Logger import enable_logging
-from service.YoutubeService import search
+from utils.YoutubeUtils import search
 
 intents=discord.Intents.default()
 bot = commands.Bot(command_prefix='!', intents = intents)
