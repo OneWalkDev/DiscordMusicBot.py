@@ -1,6 +1,8 @@
 from exception.MusicBotException import *
 import yt_dlp
 import discord
+import asyncio
+import random
 from manager.QueueManager import QueueManager
 from model.AudioModel import AudioModel
 from model.QueueModel import QueueModel
@@ -17,7 +19,14 @@ async def join(interaction):
     queue_manager.register_queue(interaction.guild.id, QueueModel(interaction.guild.id))
     await interaction.user.voice.channel.connect()
 
-async def play(voice_client, audio_model):
+async def leave(interaction):
+    if not(interaction.guild.voice_client and interaction.guild.voice_client.is_connected()):
+        raise NotJoinedException()
+    
+    queue_manager.remove_queue(interaction.guild.id)
+    await interaction.guild.voice_client.disconnect()
+
+async def play(guild, audio_model, bot):
     ydl_opts = {
         'format': 'bestaudio/best',
         'postprocessors': [{
@@ -30,7 +39,6 @@ async def play(voice_client, audio_model):
 
     url = audio_model.get_url()
 
-    print(url)
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info_dict = ydl.extract_info(url, download=False)
@@ -44,23 +52,91 @@ async def play(voice_client, audio_model):
 
             source = discord.FFmpegPCMAudio(url2, **ffmpeg_options)
             source = discord.PCMVolumeTransformer(source, volume=1.0)
-            voice_client.play(source)
-            return True
-            
+            guild.voice_client.play(source, after=lambda e: asyncio.run_coroutine_threadsafe(next(guild, bot), bot.loop))
+
     except Exception as e:
         print(f"Error: {e}")
-        return False
+
+async def next(guild, bot):
+    if not queue_manager.is_exists_queue(guild.id):
+        queue_manager.register_queue(guild.id, QueueModel(guild.id))
+
+    queue = queue_manager.get_queue(guild.id)
+
+    if queue.get_shuffle():
+        in_queue = queue.get()
+        selected = random.choice(in_queue[1:])
+        in_queue.remove(selected)
+        in_queue.insert(1, selected)
+        
+    if queue.get_queue_loop():
+        queue.add(queue.get()[0])
+
+    if not queue.get_loop():
+        queue.remove(0)
+
+    if len(queue.get()) != 0:
+        audio_model = queue.get()[0]
+        await play(guild, audio_model, bot)
 
 
-async def add_queue(guild, audio_model: AudioModel):
+
+async def add_queue(guild, audio_model: AudioModel, bot, first = False):
     guild_id = guild.id
     if not queue_manager.is_exists_queue(guild_id):
         queue_manager.register_queue(guild_id, QueueModel(guild_id))
         
     queue = queue_manager.get_queue(guild_id)
+
+    if first:
+        if len(queue.get()) == 0:
+            raise MusicInQueueNotFoundException()
+        queue.insert(audio_model)
+        return
     
     if len(queue.get()) == 0:
-        await play(guild.voice_client, audio_model)
-
+        await play(guild, audio_model, bot)
+    
     queue.add(audio_model)
 
+async def skip(guild, bot):
+    if not queue_manager.is_exists_queue(guild.id):
+        queue_manager.register_queue(guild.id, QueueModel(guild.id))
+
+    queue = queue_manager.get_queue(guild.id)
+    
+    if guild.voice_client.is_playing():
+        guild.voice_client.stop()
+    
+    queue.remove(0)
+
+    if len(queue.get()) != 0:
+        audio_model = queue.get()[0]
+        await play(guild, audio_model, bot)
+
+def loop(guild):
+    if not queue_manager.is_exists_queue(guild.id):
+        queue_manager.register_queue(guild.id, QueueModel(guild.id))
+
+    queue = queue_manager.get_queue(guild.id)
+    
+    queue.change_loop()
+    return queue.get_loop()
+
+def queue_loop(guild):
+    if not queue_manager.is_exists_queue(guild.id):
+        queue_manager.register_queue(guild.id, QueueModel(guild.id))
+
+    queue = queue_manager.get_queue(guild.id)
+    
+    queue.change_queue_loop()
+    return queue.get_queue_loop()
+
+def shuffle(guild):
+    if not queue_manager.is_exists_queue(guild.id):
+        queue_manager.register_queue(guild.id, QueueModel(guild.id))
+
+    queue = queue_manager.get_queue(guild.id)
+    
+    queue.change_shuffle()
+    return queue.get_shuffle()

@@ -1,12 +1,11 @@
 import discord
 from discord import app_commands
 from discord.ext import commands
-
 from DiscordMusicBot2 import change_presence
 import service.AudioService as AudioService
-from exception.MusicBotException import AlreadyJoinedException, UserNotJoinedException
+from exception.MusicBotException import *
 
-class joinCommand(commands.Cog):
+class leaveCommand(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -14,12 +13,12 @@ class joinCommand(commands.Cog):
     async def on_ready(self):
         await self.bot.tree.sync()
 
-    @app_commands.command(name = "join", description = "VCに参加します")
-    async def join(self, interaction: discord.Interaction):
+    @app_commands.command(name = "leave", description = "VCから退出します")
+    async def leave(self, interaction: discord.Interaction):
         try:
-            await AudioService.join(interaction)
+            await AudioService.leave(interaction)
         except(
-            AlreadyJoinedException,
+            NotJoinedException,
             UserNotJoinedException
         ) as e:
             embed = discord.Embed(title="エラー",description=e,color=0xff1100)
@@ -27,8 +26,8 @@ class joinCommand(commands.Cog):
             return
         
         await change_presence(self.bot)
-        embed = discord.Embed(title="成功",description="接続しました",color=0x3ded97)
+        embed = discord.Embed(title="成功",description="接続を解除しました",color=0x3ded97)
         await interaction.response.send_message(embed=embed, ephemeral=True)
             
 async def setup(bot: commands.Bot):
-    await bot.add_cog(joinCommand(bot))
+    await bot.add_cog(leaveCommand(bot))

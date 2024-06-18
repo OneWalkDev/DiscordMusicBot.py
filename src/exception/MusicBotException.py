@@ -13,8 +13,15 @@ class UserNotJoinedException(MusicBotException):
         return (
             "ユーザーがボイスチャットに接続されていません"
         )
-class NotRegisterQueueManagerException(MusicBotException):
+    
+class NotJoinedException(MusicBotException):
     def __str__(self) -> str:
         return (
-            "QueueManagerにQueueModelが登録されていません。"
+            "botがボイスチャットに参加していません。"
+        )
+    
+class MusicInQueueNotFoundException(MusicBotException):
+    def __str__(self) -> str:
+        return (
+            "キューに曲が存在しません"
         )

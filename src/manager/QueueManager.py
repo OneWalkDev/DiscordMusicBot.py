@@ -15,6 +15,9 @@ class QueueManager:
     def get_queue(self, guild_id):
         return self.__container.get(guild_id)
     
+    def remove_queue(self, guild_id):
+        return self.__container.pop(guild_id)
+    
     def is_exists_queue(self, guild_id):
         return guild_id in self.__container
 
