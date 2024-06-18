@@ -4,10 +4,11 @@ from config.Config import DISCORD_TOKEN, LOG
 from command.Command import load_extension
 from discord.ext import commands
 from logger.Logger import enable_logging
-from utils.YoutubeUtils import search
+from manager.QueueManager import QueueManager
 
 intents=discord.Intents.default()
 bot = commands.Bot(command_prefix='!', intents = intents)
+queue_manager = QueueManager.get_instance()
 
 async def main():
     async with bot:

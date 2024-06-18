@@ -8,7 +8,7 @@ from utils.YoutubeUtils import search, get_url, get_title
 import service.AudioService as AudioService
 from exception.MusicBotException import AlreadyJoinedException, UserNotJoinedException
 from model.AudioModel import AudioModel
-from service.AudioService import play
+from service.AudioService import add_queue
 
 class playCommand(commands.Cog):
     def __init__(self, bot):
@@ -22,6 +22,7 @@ class playCommand(commands.Cog):
     @app_commands.describe(song_name="URLか曲名を入力してください")
     @app_commands.guilds(GUILD_ID)
     async def play(self, interaction: discord.Interaction, song_name:str):
+        await interaction.response.defer(ephemeral=True)
         try:
             await AudioService.join(interaction)
         except(
@@ -35,7 +36,6 @@ class playCommand(commands.Cog):
         ) as e:
             pass
         
-        await interaction.response.defer(ephemeral=True)
         await change_presence(self.bot)
 
         search_result = search(song_name)
@@ -47,13 +47,17 @@ class playCommand(commands.Cog):
         title = get_title(search_result, 0)
 
         audio_model = AudioModel(title, url)
+        
+        embed = discord.Embed(
+            title=f"{interaction.user.name}が追加",
+            description=title,
+            color=0x3ded97,
+            timestamp=datetime.datetime.now()
+        )
 
         await interaction.followup.send(f"追加しました！")
-
-        embed = discord.Embed(title=f"{interaction.user.name}が追加",description=title,color=0x3ded97, timestamp=datetime.datetime.now())
-        await interaction.channel.send(embed=embed, ephemeral=True)
-        await play(interaction, audio_model)
-
+        await interaction.channel.send(embed=embed)
+        await add_queue(interaction.guild, audio_model)
 
             
 async def setup(bot: commands.Bot):

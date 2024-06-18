@@ -13,3 +13,8 @@ class UserNotJoinedException(MusicBotException):
         return (
             "ユーザーがボイスチャットに接続されていません"
         )
+class NotRegisterQueueManagerException(MusicBotException):
+    def __str__(self) -> str:
+        return (
+            "QueueManagerにQueueModelが登録されていません。"
+        )
