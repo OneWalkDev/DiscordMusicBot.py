@@ -30,9 +30,9 @@ class statusCommand(commands.Cog):
         
         status = get_status_dict(interaction.guild)
 
-        description=f"シャッフル: {'オン' if status["shuffle"] == True else 'オフ'}\n"
-        description+=f"ループ: {'オン' if status["loop"] == True else 'オフ'}\n"
-        description+=f"キューループ: {'オン' if status["qloop"] == True else 'オフ'}"
+        description =  "シャッフル: {}\n".format('オン' if status['shuffle'] == True else 'オフ')
+        description += "ループ: {}\n".format('オン' if status['loop'] == True else 'オフ')
+        description += "キューループ: {}\n".format('オン' if status['qloop'] == True else 'オフ')
 
         embed = discord.Embed(
             title="現在の設定",
