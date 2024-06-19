@@ -2,7 +2,8 @@ import discord
 import datetime
 from discord import app_commands
 from discord.ext import commands
-from service.AudioService import loop
+from service.AudioService import loop, check_permission
+from exception.MusicBotException import *
 
 class loopCommand(commands.Cog):
     def __init__(self, bot):
@@ -13,15 +14,19 @@ class loopCommand(commands.Cog):
         await self.bot.tree.sync()
 
     @app_commands.command(name = "loop", description = "1曲ループを設定します")
-    async def play(self, interaction: discord.Interaction):
+    async def loop(self, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True)
-        if interaction.user.voice is None:
-            embed = discord.Embed(title="エラー",description="あなた自身がVCに参加していません",color=0xff1100)
-            await interaction.followup.send(embed=embed, ephemeral=True)
 
-        if not(interaction.guild.voice_client and interaction.guild.voice_client.is_connected()):
-            embed = discord.Embed(title="エラー",description="botがVCに参加していません",color=0xff1100)
-            await interaction.followup.send(embed=embed, ephemeral=True)
+        try:
+            check_permission(interaction)
+        except(
+            UserNotJoinedException,
+            NotJoinedException,
+            NotSameVoiceChannelException
+        ) as e:
+            embed = discord.Embed(title="エラー", description=e, color=0xff1100)
+            await interaction.followup.send(embed=embed)
+            return
         
         setting_loop = loop(interaction.guild)
 

@@ -2,10 +2,10 @@ import discord
 import datetime
 from discord import app_commands
 from discord.ext import commands
-from service.AudioService import skip, check_permission
+from service.AudioService import get_status_dict, check_permission
 from exception.MusicBotException import *
 
-class skipCommand(commands.Cog):
+class statusCommand(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -13,9 +13,10 @@ class skipCommand(commands.Cog):
     async def on_ready(self):
         await self.bot.tree.sync()
 
-    @app_commands.command(name = "skip", description = "音楽をスキップします")
-    async def skip(self, interaction: discord.Interaction):
+    @app_commands.command(name = "status", description = "現在の設定状況を確認します")
+    async def play(self, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True)
+
         try:
             check_permission(interaction)
         except(
@@ -27,18 +28,22 @@ class skipCommand(commands.Cog):
             await interaction.followup.send(embed=embed)
             return
         
-        await skip(interaction.guild)
+        status = get_status_dict(interaction.guild)
+
+        description=f"シャッフル: {'オン' if status["shuffle"] == True else 'オフ'}\n"
+        description+=f"ループ: {'オン' if status["loop"] == True else 'オフ'}\n"
+        description+=f"キューループ: {'オン' if status["qloop"] == True else 'オフ'}"
 
         embed = discord.Embed(
-            title="スキップ",
-            description=f"{interaction.user.name}が曲をスキップ",
+            title="現在の設定",
+            description=description,
             color=0x3ded97,
             timestamp=datetime.datetime.now()
         )
 
-        await interaction.followup.send(f"曲をスキップしました！")
-        await interaction.channel.send(embed=embed)
+        await interaction.followup.send(embed=embed)
+
 
             
 async def setup(bot: commands.Bot):
-    await bot.add_cog(skipCommand(bot))
+    await bot.add_cog(statusCommand(bot))

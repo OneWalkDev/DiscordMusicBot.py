@@ -3,7 +3,8 @@ services:
   python:
     build: ./python
     container_name: python
-    working_dir: '/root/'
+    working_dir: '/root/src'
     tty: true
     volumes:
       - ../src:/root/src
+    command: "python /root/src/DiscordMusicBot2.py"

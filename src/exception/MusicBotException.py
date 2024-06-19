@@ -11,7 +11,7 @@ class AlreadyJoinedException(MusicBotException):
 class UserNotJoinedException(MusicBotException):
     def __str__(self):
         return (
-            "ユーザーがボイスチャットに接続されていません"
+            "ユーザーがボイスチャットに接続されていません。"
         )
     
 class NotJoinedException(MusicBotException):
@@ -20,8 +20,14 @@ class NotJoinedException(MusicBotException):
             "botがボイスチャットに参加していません。"
         )
     
+class NotSameVoiceChannelException(MusicBotException):
+    def __str__(self) -> str:
+        return (
+            "ユーザーとbotが同じボイスチャットである必要があります。"
+        )
+    
 class MusicInQueueNotFoundException(MusicBotException):
     def __str__(self) -> str:
         return (
-            "キューに曲が存在しません"
+            "キューに曲が存在しません。"
         )

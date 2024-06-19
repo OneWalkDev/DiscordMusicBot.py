@@ -79,8 +79,6 @@ async def next(guild, bot):
         audio_model = queue.get()[0]
         await play(guild, audio_model, bot)
 
-
-
 async def add_queue(guild, audio_model: AudioModel, bot, first = False):
     guild_id = guild.id
     if not queue_manager.is_exists_queue(guild_id):
@@ -91,7 +89,7 @@ async def add_queue(guild, audio_model: AudioModel, bot, first = False):
     if first:
         if len(queue.get()) == 0:
             raise MusicInQueueNotFoundException()
-        queue.insert(audio_model)
+        queue.insert(audio_model, 1)
         return
     
     if len(queue.get()) == 0:
@@ -99,7 +97,7 @@ async def add_queue(guild, audio_model: AudioModel, bot, first = False):
     
     queue.add(audio_model)
 
-async def skip(guild, bot):
+async def skip(guild):
     if not queue_manager.is_exists_queue(guild.id):
         queue_manager.register_queue(guild.id, QueueModel(guild.id))
 
@@ -107,12 +105,21 @@ async def skip(guild, bot):
     
     if guild.voice_client.is_playing():
         guild.voice_client.stop()
-    
-    queue.remove(0)
 
-    if len(queue.get()) != 0:
-        audio_model = queue.get()[0]
-        await play(guild, audio_model, bot)
+def delete(guild, queue_id):
+    if not queue_manager.is_exists_queue(guild.id):
+        queue_manager.register_queue(guild.id, QueueModel(guild.id))
+
+    guild_queue = queue_manager.get_queue(guild.id)
+    queue = guild_queue.get()
+
+    if 1 <= queue_id < len(queue):
+        delete_audio_model = queue[queue_id]
+        guild_queue.remove(queue_id)
+        return delete_audio_model
+    else:
+        raise ValueError("キュー番号が存在しません。")
+    
 
 def loop(guild):
     if not queue_manager.is_exists_queue(guild.id):
@@ -140,3 +147,40 @@ def shuffle(guild):
     
     queue.change_shuffle()
     return queue.get_shuffle()
+
+def get_status_dict(guild):
+    if not queue_manager.is_exists_queue(guild.id):
+        queue_manager.register_queue(guild.id, QueueModel(guild.id))
+
+    queue = queue_manager.get_queue(guild.id)
+
+    return {
+        "shuffle": queue.get_shuffle,
+        "loop": queue.get_loop,
+        "qloop": queue.get_queue_loop
+    }
+
+def check_permission(interaction):
+    if interaction.user.voice is None:
+        raise UserNotJoinedException()
+    elif interaction.guild.voice_client is None or not interaction.guild.voice_client.is_connected():
+        raise NotJoinedException()
+    elif interaction.user.voice.channel != interaction.guild.voice_client.channel:
+        raise NotSameVoiceChannelException()
+    
+def get_queue(guild):
+    if not queue_manager.is_exists_queue(guild.id):
+        queue_manager.register_queue(guild.id, QueueModel(guild.id))
+
+    return queue_manager.get_queue(guild.id).get()
+
+def get_now_playing_title(guild):
+    if not queue_manager.is_exists_queue(guild.id):
+        queue_manager.register_queue(guild.id, QueueModel(guild.id))
+
+    queue = queue_manager.get_queue(guild.id).get()
+
+    if len(queue) == 0:
+        return "現在再生されているものはありません。"
+    
+    return queue[0].get_title()

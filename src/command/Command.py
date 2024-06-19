@@ -1,11 +1,15 @@
 INITIAL_EXTENSIONS = [
+    'command.deleteCommand',
     'command.joinCommand',
-    'command.playCommand',
     'command.leaveCommand',
-    'command.skipCommand',
     'command.loopCommand',
+    'command.playCommand',
     'command.playskipCommand',
-    'command.shuffleCommand'
+    'command.qloopCommand',
+    'command.queueCommand',
+    'command.shuffleCommand',
+    'command.skipCommand',
+    'command.statusCommand'
 ]
 
 async def load_extension(bot):

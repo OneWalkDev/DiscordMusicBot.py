@@ -17,6 +17,9 @@ class QueueModel():
     
     def add(self, audio_model: AudioModel):
         self.__queue.append(audio_model)
+    
+    def insert(self, audio_model: AudioModel, key):
+        self.__queue.insert(1, audio_model)
 
     def remove(self, key):
         return self.__queue.pop(key)

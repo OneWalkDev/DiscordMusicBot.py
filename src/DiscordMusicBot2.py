@@ -28,6 +28,14 @@ async def on_ready():
     await change_presence(bot)
     print('Running...') 
 
+@bot.event
+async def on_voice_state_update(member, before, after):
+    if before.channel:
+        if len(before.channel.members) == 1:
+            await member.guild.voice_client.disconnect()
+            await change_presence()
+
+
 if __name__ == "__main__":
     if(LOG):
         enable_logging()

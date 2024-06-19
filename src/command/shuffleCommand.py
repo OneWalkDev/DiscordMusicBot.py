@@ -2,7 +2,8 @@ import discord
 import datetime
 from discord import app_commands
 from discord.ext import commands
-from service.AudioService import shuffle
+from service.AudioService import shuffle, check_permission
+from exception.MusicBotException import *
 
 class shuffleCommand(commands.Cog):
     def __init__(self, bot):
@@ -13,15 +14,18 @@ class shuffleCommand(commands.Cog):
         await self.bot.tree.sync()
 
     @app_commands.command(name = "shuffle", description = "シャッフルを設定します")
-    async def play(self, interaction: discord.Interaction):
+    async def shuffle(self, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True)
-        if interaction.user.voice is None:
-            embed = discord.Embed(title="エラー",description="あなた自身がVCに参加していません",color=0xff1100)
-            await interaction.followup.send(embed=embed, ephemeral=True)
-
-        if not(interaction.guild.voice_client and interaction.guild.voice_client.is_connected()):
-            embed = discord.Embed(title="エラー",description="botがVCに参加していません",color=0xff1100)
-            await interaction.followup.send(embed=embed, ephemeral=True)
+        try:
+            check_permission(interaction)
+        except(
+            UserNotJoinedException,
+            NotJoinedException,
+            NotSameVoiceChannelException
+        ) as e:
+            embed = discord.Embed(title="エラー", description=e, color=0xff1100)
+            await interaction.followup.send(embed=embed)
+            return
         
         setting_loop = shuffle(interaction.guild)
 

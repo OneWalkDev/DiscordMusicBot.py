@@ -18,8 +18,7 @@ class leaveCommand(commands.Cog):
         try:
             await AudioService.leave(interaction)
         except(
-            NotJoinedException,
-            UserNotJoinedException
+            NotJoinedException
         ) as e:
             embed = discord.Embed(title="エラー",description=e,color=0xff1100)
             await interaction.response.send_message(embed=embed, ephemeral=True)
