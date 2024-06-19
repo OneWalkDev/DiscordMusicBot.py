@@ -4,4 +4,4 @@ ffmpeg
 asyncio
 PyNaCl
 youtube-search-python
-dotenv
+python-dotenv
