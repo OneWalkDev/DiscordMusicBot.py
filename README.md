@@ -5,6 +5,8 @@
 
 Discordの音楽botです。
 
+Windows, Mac, Linuxで動作確認済みです。
+
 ボイスチャットにyoutubeの音楽を再生することができます。
 
 /play キーワード | url | playlist url
@@ -48,9 +50,10 @@ docker compose down #これで終了できます。
 [python](https://apps.microsoft.com/detail/9ncvdn91xzqp?hl=ja-jp&gl=JP)をダウンロードします。
 
 ```bash
-cp .env.example .env #.env.exampleをコピーし.envという名前で保存してください
+apt-get install ffmpeg
 
 cd src
+cp .env.example .env #.env.exampleをコピーし.envという名前で保存してください
 pip install -r requirements.txt
 python DiscordMusicBot2.py
 ```
