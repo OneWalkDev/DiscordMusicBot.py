@@ -13,5 +13,5 @@ ENV TZ JST-9
 
 RUN pip install --upgrade pip
 
-COPY ../src/requirements.txt /tmp/requirements.txt
+COPY ../../src/requirements.txt /tmp/requirements.txt
 RUN pip install -r /tmp/requirements.txt
