@@ -13,4 +13,5 @@ ENV TZ JST-9
 
 RUN pip install --upgrade pip
 
-RUN pip install discord.py yt-dlp python-dotenv PyNaCl ffmpeg youtube-search-python
+COPY ../src/requirements.txt /tmp/requirements.txt
+RUN pip install -r /tmp/requirements.txt
