@@ -84,20 +84,22 @@ class playCommand(commands.Cog):
 
     async def add_playlist(self, interaction: discord.Interaction, playlist_url):
         playlist_info = get_playlist(playlist_url)
-        videos = playlist_info['videos']
-            
+        videos = playlist_info.get('entries', []) if playlist_info else []
+        playlist_title = playlist_info.get('title', 'プレイリスト') if playlist_info else 'プレイリスト'
+
         audio_models = []
         for video in videos:
-            try:
-                url = extract_video_url_from_playlist_video(video['link'])
-                audio_models.append(AudioModel(video['title'], url))
-            except ValueError as e:
-                print(f"Skipping video due to error: {e}")
+            if not video:
                 continue
+            video_id = video.get('id')
+            if not video_id:
+                continue
+            url = f"https://www.youtube.com/watch?v={video_id}"
+            audio_models.append(AudioModel(video.get('title', video_id), url))
 
         embed = discord.Embed(
             title=f"{interaction.user.name}が追加",
-            description=f"プレイリスト {playlist_info['info']['title']} を追加しました！",
+            description=f"プレイリスト {playlist_title} を追加しました！",
             color=0x3ded97,
             timestamp=datetime.datetime.now()
         )
@@ -105,7 +107,7 @@ class playCommand(commands.Cog):
         for audio in audio_models:
             print(f'Title: {audio.get_title()}, URL: {audio.get_url()}')
 
-        await interaction.followup.send(f"プレイリスト {playlist_info['info']['title']} を追加しました！")
+        await interaction.followup.send(f"プレイリスト {playlist_title} を追加しました！")
         await interaction.channel.send(embed=embed)
 
         for audio in audio_models:

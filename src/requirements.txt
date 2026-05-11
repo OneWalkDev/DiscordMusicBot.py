@@ -3,6 +3,5 @@ yt-dlp
 ffmpeg
 asyncio
 PyNaCl
-youtube-search-python
 httpx<0.24.0
 python-dotenv
